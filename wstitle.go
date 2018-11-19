@@ -3,11 +3,30 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 	"regexp"
 
 	"github.com/gen2brain/dlgs"
 	"go.i3wm.org/i3"
 )
+
+func help() {
+	if len(os.Args) > 1 {
+		arg := os.Args[1]
+		helpText := fmt.Sprintf(`
+"%s" is a workspace rename utility for i3wm and sway.
+Valid command line options:
+  "-h" or "-help" or "--help"
+`, os.Args[0])
+		if arg == "-h" || arg == "--help" || arg == "-help" {
+			fmt.Println(helpText)
+			os.Exit(0)
+		} else {
+			os.Stderr.WriteString(helpText)
+			os.Exit(1)
+		}
+	}
+}
 
 func getCurrentWorkspace() (ws *i3.Node) {
 	tree, err := i3.GetTree()
@@ -36,6 +55,7 @@ func getReParams(regEx, str string) (reMap map[string]string) {
 }
 
 func main() {
+	help()
 	ws := getCurrentWorkspace()
 	curWsTitle := getReParams(`^((?P<Number>\d+)(?P<Sep>: ))?(?P<Title>.*)`, ws.Name)
 	title := curWsTitle["Title"]
