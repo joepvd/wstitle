@@ -58,9 +58,16 @@ func main() {
 	help()
 	ws := getCurrentWorkspace()
 	curWsTitle := getReParams(`^((?P<Number>\d+)(?P<Sep>: ))?(?P<Title>.*)`, ws.Name)
-	title := curWsTitle["Title"]
-	number := curWsTitle["Number"]
-	sep := curWsTitle["Sep"]
+	var number, sep, title string
+	if curWsTitle["Number"] == "" {
+		number = curWsTitle["Title"]
+		sep = ": "
+		title = ""
+	} else {
+		title = curWsTitle["Title"]
+		number = curWsTitle["Number"]
+		sep = curWsTitle["Sep"]
+	}
 
 	str, ok, err := dlgs.Entry("wstitle", "Set workspace title", title)
 	if !ok {
