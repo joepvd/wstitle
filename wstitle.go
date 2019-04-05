@@ -1,6 +1,7 @@
 package main
 
 import (
+//  "flag"
 	"fmt"
 	"log"
 	"os"
@@ -54,8 +55,14 @@ func getReParams(regEx, str string) (reMap map[string]string) {
 	return
 }
 
-func main() {
-	help()
+type wsName struct {
+  name string
+  number string
+  sep string
+  title string
+}
+
+func getWsName() wsName {
 	ws := getCurrentWorkspace()
 	curWsTitle := getReParams(`^((?P<Number>\d+)(?P<Sep>: ))?(?P<Title>.*)`, ws.Name)
 	var number, sep, title string
@@ -68,13 +75,22 @@ func main() {
 		number = curWsTitle["Number"]
 		sep = curWsTitle["Sep"]
 	}
+  name := wsName{ws.Name, number, sep, title}
+  return name
+}
 
-	str, ok, err := dlgs.Entry("wstitle", "Set workspace title", title)
+func main() {
+	help()
+
+  ws := getWsName()
+
+
+	str, ok, err := dlgs.Entry("wstitle", "Set workspace title", ws.title)
 	if !ok {
 		log.Fatalln(err)
 	}
-	newTitle := fmt.Sprintf("%s%s%s", number, sep, str)
-	_, err = i3.RunCommand(fmt.Sprintf(`rename workspace "%s" to "%s"`, ws.Name, newTitle))
+	newTitle := fmt.Sprintf("%s%s%s", ws.number, ws.sep, str)
+	_, err = i3.RunCommand(fmt.Sprintf(`rename workspace "%s" to "%s"`, ws.name, newTitle))
 	if err != nil {
 		log.Fatalln(err)
 	}
