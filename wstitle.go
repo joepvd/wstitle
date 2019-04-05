@@ -1,7 +1,7 @@
 package main
 
 import (
-//  "flag"
+  "flag"
 	"fmt"
 	"log"
 	"os"
@@ -11,23 +11,6 @@ import (
 	"go.i3wm.org/i3"
 )
 
-func help() {
-	if len(os.Args) > 1 {
-		arg := os.Args[1]
-		helpText := fmt.Sprintf(`
-"%s" is a workspace rename utility for i3wm and sway.
-Valid command line options:
-  "-h" or "-help" or "--help"
-`, os.Args[0])
-		if arg == "-h" || arg == "--help" || arg == "-help" {
-			fmt.Println(helpText)
-			os.Exit(0)
-		} else {
-			os.Stderr.WriteString(helpText)
-			os.Exit(1)
-		}
-	}
-}
 
 func getCurrentWorkspace() (ws *i3.Node) {
 	tree, err := i3.GetTree()
@@ -62,7 +45,7 @@ type wsName struct {
   title string
 }
 
-func getWsName() wsName {
+func getWsName() (wsName, error) {
 	ws := getCurrentWorkspace()
 	curWsTitle := getReParams(`^((?P<Number>\d+)(?P<Sep>: ))?(?P<Title>.*)`, ws.Name)
 	var number, sep, title string
@@ -76,19 +59,41 @@ func getWsName() wsName {
 		sep = curWsTitle["Sep"]
 	}
   name := wsName{ws.Name, number, sep, title}
-  return name
+  return name, nil
 }
 
-func main() {
-	help()
-
-  ws := getWsName()
-
+func getNewNameWindow(ws wsName) (str string) {
 
 	str, ok, err := dlgs.Entry("wstitle", "Set workspace title", ws.title)
 	if !ok {
 		log.Fatalln(err)
 	}
+  return str
+}
+
+func main() {
+  var mode, dmenuCommand string
+  flag.Usage = func() {
+    fmt.Fprintf(os.Stderr, "Usage of %s:\n", os.Args[0])
+    fmt.Fprintf(os.Stderr, "%s is a workspace rename utility for i3wm and sway\n", os.Args[0])
+    flag.PrintDefaults()
+  }
+  flag.StringVar(&mode, "mode", "window", "how to select (possible values: window, dmenu")
+  flag.StringVar(&dmenuCommand, "dmenu", "dmenu-run", "The dmenu command")
+  flag.Parse()
+
+  ws, err := getWsName()
+
+  var str string
+  switch mode {
+  case "window":
+    str = getNewNameWindow(ws)
+  case "dmenu":
+    str = getNewNameWindow(ws)
+  default:
+    log.Fatalf("Do not understand Mode %s\n", mode)
+  }
+
 	newTitle := fmt.Sprintf("%s%s%s", ws.number, ws.sep, str)
 	_, err = i3.RunCommand(fmt.Sprintf(`rename workspace "%s" to "%s"`, ws.name, newTitle))
 	if err != nil {
