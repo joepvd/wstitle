@@ -2,8 +2,8 @@ package wstitle
 
 import (
 	"log"
-  "strings"
 	"regexp"
+	"strings"
 
 	"github.com/gen2brain/dlgs"
 	"go.i3wm.org/i3"
@@ -36,10 +36,10 @@ func getReParams(regEx, str string) (reMap map[string]string) {
 }
 
 type wsName struct {
-  Name string
-  Number string
-  Sep string
-  Title string
+	Name   string
+	Number string
+	Sep    string
+	Title  string
 }
 
 func GetWsName() (wsName, error) {
@@ -55,8 +55,8 @@ func GetWsName() (wsName, error) {
 		number = curWsTitle["Number"]
 		sep = curWsTitle["Sep"]
 	}
-  name := wsName{ws.Name, number, sep, title}
-  return name, nil
+	name := wsName{ws.Name, number, sep, title}
+	return name, nil
 }
 
 func GetNewNameWindow(ws wsName) (str string) {
@@ -64,31 +64,31 @@ func GetNewNameWindow(ws wsName) (str string) {
 	if !ok {
 		log.Fatalln(err)
 	}
-  return str
+	return str
 }
 
 func GetNewNameDmenu(name wsName) (str string) {
-  var leafList []*i3.Node
-  ws := getCurrentWorkspace()
-  leaves := walkTree(ws, leafList)
-  // for _, node := range children {
-  //   fmt.Println("result:", node.Name)
-  // }
-  inList := []string{name.Title}
-  for _, leaf := range leaves {
-    inList = append(inList, leaf.Name)
-  }
-  stdin := strings.Join(inList[:], "\n")
+	var leafList []*i3.Node
+	ws := getCurrentWorkspace()
+	leaves := walkTree(ws, leafList)
+	// for _, node := range children {
+	//   fmt.Println("result:", node.Name)
+	// }
+	inList := []string{name.Title}
+	for _, leaf := range leaves {
+		inList = append(inList, leaf.Name)
+	}
+	stdin := strings.Join(inList[:], "\n")
 
-  return stdin
+	return stdin
 }
 
-func walkTree(node *i3.Node, list []*i3.Node) ([]*i3.Node) {
-  if len(node.Nodes) == 0 {
-    return append(list, node)
-  }
-  for _, child := range node.Nodes {
-    list = walkTree(child, list)
-  }
-  return list
+func walkTree(node *i3.Node, list []*i3.Node) []*i3.Node {
+	if len(node.Nodes) == 0 {
+		return append(list, node)
+	}
+	for _, child := range node.Nodes {
+		list = walkTree(child, list)
+	}
+	return list
 }
