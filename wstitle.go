@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+  "strings"
 	"regexp"
 
 	"github.com/gen2brain/dlgs"
@@ -63,12 +64,37 @@ func getWsName() (wsName, error) {
 }
 
 func getNewNameWindow(ws wsName) (str string) {
-
 	str, ok, err := dlgs.Entry("wstitle", "Set workspace title", ws.title)
 	if !ok {
 		log.Fatalln(err)
 	}
   return str
+}
+
+func getNewNameDmenu(name wsName) (str string) {
+  var leafList []*i3.Node
+  ws := getCurrentWorkspace()
+  leaves := walkTree(ws, leafList)
+  // for _, node := range children {
+  //   fmt.Println("result:", node.Name)
+  // }
+  inList := []string{name.title}
+  for _, leaf := range leaves {
+    inList = append(inList, leaf.Name)
+  }
+  stdin := strings.Join(inList[:], "\n")
+
+  return stdin
+}
+
+func walkTree(node *i3.Node, list []*i3.Node) ([]*i3.Node) {
+  if len(node.Nodes) == 0 {
+    return append(list, node)
+  }
+  for _, child := range node.Nodes {
+    list = walkTree(child, list)
+  }
+  return list
 }
 
 func main() {
@@ -89,7 +115,7 @@ func main() {
   case "window":
     str = getNewNameWindow(ws)
   case "dmenu":
-    str = getNewNameWindow(ws)
+    str = getNewNameDmenu(ws)
   default:
     log.Fatalf("Do not understand Mode %s\n", mode)
   }
