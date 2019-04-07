@@ -1,6 +1,7 @@
 package wstitle
 
 import (
+	"fmt"
 	"log"
 	"regexp"
 
@@ -46,15 +47,15 @@ func currentWorkspace() (ws *i3.Node) {
 	return
 }
 
-func ActiveWindow() (WsName, bool) {
+func ActiveWindow() (string, bool) {
 	var leafList []*i3.Node
 	ws := currentWorkspace()
 	for _, leaf := range Leaves(ws, leafList) {
 		if leaf.Focused {
-			return WsName{leaf.Name, "", "", ""}, true
+			return leaf.Name, true
 		}
 	}
-	return WsName{}, false
+	return "", false
 }
 
 func getReParams(regEx, str string) (reMap map[string]string) {
@@ -85,4 +86,10 @@ func Ask(name string) (str string) {
 		log.Fatalln(err)
 	}
 	return str
+}
+
+func SetTitle(name string, ws WsName) (err error) {
+	newTitle := fmt.Sprintf("%s%s%s", ws.Number, ws.Sep, name)
+	_, err = i3.RunCommand(fmt.Sprintf(`rename workspace "%s" to "%s"`, ws.Name, newTitle))
+	return
 }
