@@ -6,9 +6,8 @@ import (
 	"log"
 	"os"
 
-	"go.i3wm.org/i3"
-
 	"github.com/joepvd/wstitle"
+	"go.i3wm.org/i3"
 )
 
 func main() {
@@ -22,17 +21,27 @@ func main() {
 	flag.StringVar(&dmenuCommand, "dmenu", "dmenu-run", "The dmenu command")
 	flag.Parse()
 
-	ws, err := wstitle.GetWsName()
-
+	var ok bool
+	var name wstitle.WsName
 	var str string
+
+	ws, err := wstitle.ActiveWorkspace()
+	if err != nil {
+		log.Fatalf("Crap")
+	}
+
 	switch mode {
 	case "window":
-		str = wstitle.GetNewNameWindow(ws)
+		name = ws
 	case "dmenu":
-		str = wstitle.GetNewNameDmenu(ws)
+		name, ok = wstitle.ActiveWindow()
+		if !ok {
+			log.Fatalf("It is bad, mkay?\n")
+		}
 	default:
 		log.Fatalf("Do not understand Mode %s\n", mode)
 	}
+	str = wstitle.Ask(name.Title)
 
 	newTitle := fmt.Sprintf("%s%s%s", ws.Number, ws.Sep, str)
 	_, err = i3.RunCommand(fmt.Sprintf(`rename workspace "%s" to "%s"`, ws.Name, newTitle))
