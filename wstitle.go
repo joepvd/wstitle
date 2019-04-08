@@ -47,15 +47,15 @@ func currentWorkspace() (ws *i3.Node) {
 	return
 }
 
-func ActiveWindow() (string, bool) {
+func ActiveWindow() (WsName, bool) {
 	var leafList []*i3.Node
 	ws := currentWorkspace()
 	for _, leaf := range Leaves(ws, leafList) {
 		if leaf.Focused {
-			return leaf.Name, true
+			return WsName{leaf.Name, "", "", ""}, true
 		}
 	}
-	return "", false
+	return WsName{}, false
 }
 
 func getReParams(regEx, str string) (reMap map[string]string) {
@@ -80,12 +80,18 @@ func Leaves(node *i3.Node, list []*i3.Node) []*i3.Node {
 	return list
 }
 
-func Ask(name string) (str string) {
+func Ask(name string) (str string, ret bool) {
 	str, ok, err := dlgs.Entry("wstitle", "Set workspace title", name)
-	if !ok {
-		log.Fatalln(err)
+	if err != nil {
+		log.Fatal(err)
 	}
-	return str
+	if !ok {
+		log.Fatal("cancel pressed")
+	}
+	if name != str {
+		ret = true
+	}
+	return
 }
 
 func SetTitle(name string, ws WsName) (err error) {
