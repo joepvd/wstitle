@@ -4,15 +4,15 @@
 dialogue containing the current name (if available). It will set the name of the
 workspace to entered name.
 
+There are two modi: Default (and per command line argument `-window`, the title
+of the currently focused window is taken. With the argument `-workspace`, the
+current workspace title will be selected.
+
 ## Installation
 
-Ensure your GOPATH is set up. Get the dependencies:
-
 ```sh
-go get -u github.com/gen2brain/dlgs
-go get -u go.i3wm.org/i3
-go build .
-cp wstitle ~/bin # Or wherever your treasure trove is located
+make build
+cp wstitle ~/bin
 ```
 
 ## Configuration
