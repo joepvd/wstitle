@@ -18,7 +18,7 @@ type WsName struct {
 
 func ActiveWorkspace() (WsName, error) {
 	ws := currentWorkspace()
-	curWsTitle := getReParams(`^((?P<Number>\d+)(?P<Sep>: ))?(?P<Title>.*)`, ws.Name)
+	curWsTitle := getReParams(`^((?P<Number>\d+)(?P<Sep>: ))?(?P<Title>.+)`, ws.Name)
 	var number, sep, title string
 	if curWsTitle["Number"] == "" {
 		number = curWsTitle["Title"]
@@ -71,7 +71,7 @@ func getReParams(regEx, str string) (reMap map[string]string) {
 }
 
 func Leaves(node *i3.Node, list []*i3.Node) []*i3.Node {
-	if len(node.Nodes) == 0 {
+	if len(node.Nodes) == 0 && node.Type != i3.WorkspaceNode {
 		return append(list, node)
 	}
 	for _, child := range node.Nodes {

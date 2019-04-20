@@ -48,7 +48,7 @@ func main() {
 func TryWindow(ws wstitle.WsName) (string, bool) {
 	win, ok := wstitle.ActiveWindow()
 	if !ok {
-		log.Fatalf("It is bad, mkay?\n")
+		win.Title = ""
 	}
 	return wstitle.Ask(win.Title)
 }
