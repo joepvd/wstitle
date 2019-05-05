@@ -40,7 +40,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err = wstitle.SetTitle(newName, ws); err != nil {
+	if err = ws.SetTitle(newName); err != nil {
 		log.Fatalln(err)
 	}
 }

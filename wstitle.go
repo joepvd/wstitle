@@ -10,6 +10,7 @@ import (
 )
 
 type WsName struct {
+	node   *i3.Node
 	Title  string
 	Name   string
 	Number string
@@ -29,7 +30,7 @@ func ActiveWorkspace() (WsName, error) {
 		number = curWsTitle["Number"]
 		sep = curWsTitle["Sep"]
 	}
-	name := WsName{title, ws.Name, number, sep}
+	name := WsName{ws, title, ws.Name, number, sep}
 	return name, nil
 }
 
@@ -52,7 +53,7 @@ func ActiveWindow() (WsName, bool) {
 	ws := currentWorkspace()
 	for _, leaf := range Leaves(ws, leafList) {
 		if leaf.Focused {
-			return WsName{leaf.Name, "", "", ""}, true
+			return WsName{leaf, leaf.Name, "", "", ""}, true
 		}
 	}
 	return WsName{}, false
@@ -94,7 +95,9 @@ func Ask(name string) (str string, ret bool) {
 	return
 }
 
-func SetTitle(name string, ws WsName) (err error) {
+// XXX: Maybe should be a Write method?
+// Consider ReadWriter implementation?
+func (ws *WsName) SetTitle(name string) (err error) {
 	newTitle := fmt.Sprintf("%s%s%s", ws.Number, ws.Sep, name)
 	_, err = i3.RunCommand(fmt.Sprintf(`rename workspace "%s" to "%s"`, ws.Name, newTitle))
 	return
